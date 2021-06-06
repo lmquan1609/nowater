@@ -10,7 +10,7 @@ nowaterdir="$cachedir/nowater"
 default_wp_url="https://raw.githubusercontent.com/justanoobcoder/nowater/master/default.jpg"
 
 [ -d "$nowaterdir" ] || mkdir -p "$nowaterdir"
-[ -f "$nowaterdir/default.jpg" ] || wget --hsts-file="$cachedir/wget-hsts" -T 5 --no-check-certificate -q -P down -O "$nowaterdir/default.jpg" $default_wp_url
+[ -f "$nowaterdir/default.jpg" ] || wget --hsts-file="$cachedir/wget-hsts" -T 60 --no-check-certificate -q -P down -O "$nowaterdir/default.jpg" $default_wp_url
 
 usage() {
     echo "Usage: nowater <option> <argument>
@@ -42,7 +42,7 @@ reddit() {
         sub=$1
     fi
     url="https://www.reddit.com/r/$sub/hot/.json?raw_json=1&t="
-    content=`wget --hsts-file="$cachedir/wget-hsts" -T 10 -q -O - $url`
+    content=`wget --hsts-file="$cachedir/wget-hsts" -T 60 -q -O - $url`
     urls=$(echo -n "$content"| jq -r '.data.children[]|select(.data.post_hint|test("image")?) | .data.preview.images[0].source.url')
     arrURLS=($urls)
     wait
@@ -55,7 +55,7 @@ reddit() {
     fi
     idx=$(($RANDOM % $size))
     target_url=${arrURLS[$idx]}
-    wget --hsts-file="$cachedir/wget-hsts" -T 10 -check-certificate -q -P down -O /tmp/nowater.jpg $target_url &>/dev/null
+    wget --hsts-file="$cachedir/wget-hsts" -T 60 --no-check-certificate -q -P down -O "/tmp/nowater.jpg" $target_url &>/dev/null
 }
 
 PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:l:r:c:f:d:h --long fehbg:,link:,subreddit:,fehopt:,file:,directory -- "$@")
