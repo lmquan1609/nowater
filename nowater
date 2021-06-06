@@ -2,8 +2,8 @@
 
 [ $EUID -eq 0 ] && echo "Do not run this script as root." && exit
 
-which feh > /dev/null || echo "This script required feh to work, so install it first!"
-which wget > /dev/null || echo "This script required wget to work, so install it first!"
+which feh > /dev/null || { echo "This script required feh to work, so install it first!" && exit; }
+which wget > /dev/null || { echo "This script required wget to work, so install it first!" && exit; }
 
 cachedir="$HOME/.cache"
 nowalldir="$cachedir/nowall"
