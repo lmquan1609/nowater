@@ -3,7 +3,7 @@
 PREFIX = /usr/local
 
 all:
-	@echo "Run 'sudo make install' to install nowall."
+	@echo "Run 'sudo make install' to install nowater."
 
 install:
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
