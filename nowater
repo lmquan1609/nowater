@@ -4,9 +4,7 @@ error() { echo "$1" && exit; }
 
 [ $EUID -eq 0 ] && error "Do not run this script as root."
 
-checkInternet() {
-    wget --hsts-file="$cachedir/wget-hsts" --quiet --spider google.com
-}
+checkInternet() { wget --hsts-file="$cachedir/wget-hsts" --quiet --spider google.com; }
 
 which feh > /dev/null || error "This script required feh to work, so install it first!"
 which wget > /dev/null || error "This script required wget to work, so install it first!"
@@ -16,7 +14,7 @@ nowaterdir="$cachedir/nowater"
 default_wp_url="https://raw.githubusercontent.com/justanoobcoder/nowater/master/default.jpg"
 
 [ -d "$nowaterdir" ] || mkdir -p "$nowaterdir"
-[ -f "$nowaterdir/default.jpg" ] && checkInternet || wget --hsts-file="$cachedir/wget-hsts" -T 60 --no-check-certificate -q -P down -O "$nowaterdir/default.jpg" $default_wp_url
+[ ! -f "$nowaterdir/default.jpg" ] && checkInternet || wget --hsts-file="$cachedir/wget-hsts" -T 60 --no-check-certificate -q -P down -O "$nowaterdir/default.jpg" $default_wp_url
 
 usage() {
     echo "Usage: nowater <option> <argument>
@@ -59,8 +57,7 @@ reddit() {
 }
 
 PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:l:r:c:t:f:d:h --long fehbg:,link:,subreddit:,fehopt:,time:,file:,directory -- "$@")
-VALID_ARGUMENTS=$?
-[ "$VALID_ARGUMENTS" != "0" ] && usage
+[ $? -ne 0 ] && usage
 
 while :; do
     case "${1}" in
@@ -71,7 +68,7 @@ while :; do
         -t | --time) 		time=${2} ; shift 2 ;;
         -f | --file) 		file=${2} ; shift 2 ;;
         -d | --directory) 	dir=${2} ; shift 2 ;;
-        -- | '') 			shift; break ;;
+        -- | '')            shift; break ;;
         -h | --help)        usage ;;
         *) echo "Unexpected option: $1 is not a valid option." ; usage ;;
     esac
@@ -79,11 +76,11 @@ done
 
 feh=(feh --no-fehbg)
 if [ ! -z "$bgtype" ]; then
-    [ "$bgtype" == 'bg-center' ] && feh+=(--bg-center)
-    [ "$bgtype" == 'bg-fill' ] && feh+=(--bg-fill)
-    [ "$bgtype" == 'bg-max' ] && feh+=(--bg-max)
-    [ "$bgtype" == 'bg-scale' ] && feh+=(--bg-scale)
-    [ "$bgtype" == 'bg-tile' ] && feh+=(--bg-tile)
+    [ "$bgtype" == 'bg-center' ]    && feh+=(--bg-center)
+    [ "$bgtype" == 'bg-fill' ]      && feh+=(--bg-fill)
+    [ "$bgtype" == 'bg-max' ]       && feh+=(--bg-max)
+    [ "$bgtype" == 'bg-scale' ]     && feh+=(--bg-scale)
+    [ "$bgtype" == 'bg-tile' ]      && feh+=(--bg-tile)
 else
     feh+=(--bg-scale)
 fi
@@ -109,7 +106,7 @@ else
         [ -f /tmp/nowater.jpg ] && feh+=("/tmp/nowater.jpg") || feh+=("$nowaterdir/default.jpg")
         "${feh[@]}"
         [ ! -z "$time" ] && sleep "$time" || break
-    done &
+    done
 fi
 
 exit 0
