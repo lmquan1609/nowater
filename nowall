@@ -1,0 +1,121 @@
+#!/bin/bash
+
+[ $EUID -eq 0 ] && echo "Do not run this script as root." && exit
+
+which feh > /dev/null || echo "This script required feh to work, so install it first!"
+which wget > /dev/null || echo "This script required wget to work, so install it first!"
+
+cachedir="$HOME/.cache"
+nowalldir="$cachedir/nowall"
+default_wp_url="https://gitlab.com/justanoobcoder/dotfiles/-/raw/master/user/pictures/wallpapers/wallpaper5.jpg"
+
+[ -d "$nowalldir" ] || mkdir -p "$nowalldir"
+[ -f "$nowalldir/default.jpg" ] || wget --hsts-file="$cachedir/wget-hsts" -T 5 --no-check-certificate -q -P down -O "$nowalldir/default.jpg" $default_wp_url
+
+usage() {
+    echo "Usage: nowall <option> <argument>
+                    [-b | --fehbg <feh bg opt>]
+                    [-c | --fehopt <feh opt>]
+                    [-r | --subreddit <subreddit>]
+                    [-l | --link <source>]
+                    [-f | --file <image file>]
+                    [-d | --directory <image directory>]
+                    [-h | --help]"
+    exit
+}
+
+checkInternet() {
+    wget --hsts-file="$cachedir/wget-hsts" --quiet --spider google.com
+}
+
+reddit() {
+    checkInternet || { echo "No internet!" && return; }
+
+    [ -f "$nowalldir/subreddits" ] || printf "wallpaper\nwallpapers" > "$nowalldir/subreddits"
+
+    readarray subreddits < "$nowalldir/subreddits"
+    a=${#subreddits[@]}
+    b=$(($RANDOM % $a))
+    sub=${subreddits[$b]}
+    sub="$(echo -e "${sub}" | tr -d '[:space:]')"
+    if [ ! -z $1 ]; then
+        sub=$1
+    fi
+    url="https://www.reddit.com/r/$sub/hot/.json?raw_json=1&t="
+    content=`wget --hsts-file="$cachedir/wget-hsts" -T 10 -q -O - $url`
+    urls=$(echo -n "$content"| jq -r '.data.children[]|select(.data.post_hint|test("image")?) | .data.preview.images[0].source.url')
+    arrURLS=($urls)
+    wait
+    size=${#arrURLS[@]}
+    if [ $size -eq 0 ]; then
+        echo The current subreddit is not valid
+        [ -f /tmp/nowall.jpg ] && feh+=("/tmp/nowall.jpg") || feh+=("$nowalldir/default.jpg")
+        "${feh[@]}"
+        exit
+    fi
+    idx=$(($RANDOM % $size))
+    target_url=${arrURLS[$idx]}
+    wget --hsts-file="$cachedir/wget-hsts" -T 10 -check-certificate -q -P down -O /tmp/nowall.jpg $target_url &>/dev/null
+}
+
+PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:l:r:c:f:d:h --long fehbg:,link:,subreddit:,fehopt:,file:,directory -- "$@")
+VALID_ARGUMENTS=$?
+if [ "$VALID_ARGUMENTS" != "0" ]; then
+    usage
+fi
+while :; do
+    case "${1}" in
+        -b | --fehbg)     	bgtype=${2} ; shift 2 ;;
+        -l | --link)      	link=${2} ; shift 2 ;;
+        -r | --subreddit) 	sub=${2} ; shift 2 ;;
+        -c | --fehopt)    	custom=${2} ; shift 2 ;;
+        -f | --file) 		file=${2} ; shift 2 ;;
+        -d | --directory) 	dir=${2} ; shift 2 ;;
+        -- | '') 			shift; break ;;
+        -h | --help)        usage ;;
+        *) echo "Unexpected option: $1 is not a valid option." ; usage ;;
+    esac
+done
+
+feh=(feh --no-fehbg)
+if [ ! -z "$bgtype" ]; then
+    if [ "$bgtype" == 'bg-center' ]; then
+        feh+=(--bg-center)
+    fi
+    if [ "$bgtype" == 'bg-fill' ]; then
+        feh+=(--bg-fill)
+    fi
+    if [ "$bgtype" == 'bg-max' ]; then
+        feh+=(--bg-max)
+    fi
+    if [ "$bgtype" == 'bg-scale' ]; then
+        feh+=(--bg-scale)
+    fi
+    if [ "$bgtype" == 'bg-tile' ]; then
+        feh+=(--bg-tile)
+    fi
+else
+    feh+=(--bg-scale)
+fi
+
+[ -z "$custom" ] || feh+=("$custom")
+
+if [ ! -z "$dir" ]; then
+    feh+=(--randomize "$dir")
+	"${feh[@]}"
+elif [ ! -z "$file" ]; then
+	feh+=("$file")
+	"${feh[@]}"
+else
+    if [ "$link" == "reddit" ] || [ ! -z "$sub" ]; then
+        reddit "$sub" &
+        [ -f /tmp/nowall.jpg ] && feh+=("/tmp/nowall.jpg") || feh+=("$nowalldir/default.jpg")
+		"${feh[@]}"
+    else
+        checkInternet && wget --hsts-file="$cachedir/wget-hsts" -q -O "/tmp/nowall.jpg" "$link"
+        [ -f /tmp/nowall.jpg ] && feh+=("/tmp/nowall.jpg") || feh+=("$nowalldir/default.jpg")
+        "${feh[@]}"
+    fi
+fi
+
+exit 0
