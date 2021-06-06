@@ -6,14 +6,14 @@ which feh > /dev/null || { echo "This script required feh to work, so install it
 which wget > /dev/null || { echo "This script required wget to work, so install it first!" && exit; }
 
 cachedir="$HOME/.cache"
-nowalldir="$cachedir/nowall"
+nowaterdir="$cachedir/nowater"
 default_wp_url="https://github.com/justanoobcoder/nowater/blob/master/default.jpg"
 
-[ -d "$nowalldir" ] || mkdir -p "$nowalldir"
-[ -f "$nowalldir/default.jpg" ] || wget --hsts-file="$cachedir/wget-hsts" -T 5 --no-check-certificate -q -P down -O "$nowalldir/default.jpg" $default_wp_url
+[ -d "$nowaterdir" ] || mkdir -p "$nowaterdir"
+[ -f "$nowaterdir/default.jpg" ] || wget --hsts-file="$cachedir/wget-hsts" -T 5 --no-check-certificate -q -P down -O "$nowaterdir/default.jpg" $default_wp_url
 
 usage() {
-    echo "Usage: nowall <option> <argument>
+    echo "Usage: nowater <option> <argument>
                     [-b | --fehbg <feh bg opt>]
                     [-c | --fehopt <feh opt>]
                     [-r | --subreddit <subreddit>]
@@ -31,9 +31,9 @@ checkInternet() {
 reddit() {
     checkInternet || { echo "No internet!" && return; }
 
-    [ -f "$nowalldir/subreddits" ] || printf "wallpaper\nwallpapers" > "$nowalldir/subreddits"
+    [ -f "$nowaterdir/subreddits" ] || printf "wallpaper\nwallpapers" > "$nowaterdir/subreddits"
 
-    readarray subreddits < "$nowalldir/subreddits"
+    readarray subreddits < "$nowaterdir/subreddits"
     a=${#subreddits[@]}
     b=$(($RANDOM % $a))
     sub=${subreddits[$b]}
@@ -49,13 +49,13 @@ reddit() {
     size=${#arrURLS[@]}
     if [ $size -eq 0 ]; then
         echo The current subreddit is not valid
-        [ -f /tmp/nowall.jpg ] && feh+=("/tmp/nowall.jpg") || feh+=("$nowalldir/default.jpg")
+        [ -f /tmp/nowater.jpg ] && feh+=("/tmp/nowater.jpg") || feh+=("$nowaterdir/default.jpg")
         "${feh[@]}"
         exit
     fi
     idx=$(($RANDOM % $size))
     target_url=${arrURLS[$idx]}
-    wget --hsts-file="$cachedir/wget-hsts" -T 10 -check-certificate -q -P down -O /tmp/nowall.jpg $target_url &>/dev/null
+    wget --hsts-file="$cachedir/wget-hsts" -T 10 -check-certificate -q -P down -O /tmp/nowater.jpg $target_url &>/dev/null
 }
 
 PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:l:r:c:f:d:h --long fehbg:,link:,subreddit:,fehopt:,file:,directory -- "$@")
@@ -109,11 +109,11 @@ elif [ ! -z "$file" ]; then
 else
     if [ "$link" == "reddit" ] || [ ! -z "$sub" ]; then
         reddit "$sub" &
-        [ -f /tmp/nowall.jpg ] && feh+=("/tmp/nowall.jpg") || feh+=("$nowalldir/default.jpg")
+        [ -f /tmp/nowater.jpg ] && feh+=("/tmp/nowater.jpg") || feh+=("$nowaterdir/default.jpg")
 		"${feh[@]}"
     else
-        checkInternet && wget --hsts-file="$cachedir/wget-hsts" -q -O "/tmp/nowall.jpg" "$link"
-        [ -f /tmp/nowall.jpg ] && feh+=("/tmp/nowall.jpg") || feh+=("$nowalldir/default.jpg")
+        checkInternet && wget --hsts-file="$cachedir/wget-hsts" -q -O "/tmp/nowater.jpg" "$link"
+        [ -f /tmp/nowater.jpg ] && feh+=("/tmp/nowater.jpg") || feh+=("$nowaterdir/default.jpg")
         "${feh[@]}"
     fi
 fi
