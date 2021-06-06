@@ -24,6 +24,7 @@ usage() {
                     [-c | --fehopt <feh opt>]
                     [-r | --subreddit <subreddit>]
                     [-l | --link <source>]
+                    [-t | --time <cycle time>]
                     [-f | --file <image file>]
                     [-d | --directory <image directory>]
                     [-h | --help]"
@@ -57,7 +58,7 @@ reddit() {
     wget --hsts-file="$cachedir/wget-hsts" -T 10 --no-check-certificate -q -P down -O "/tmp/nowater.jpg" $target_url &>/dev/null
 }
 
-PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:l:r:c:f:d:h --long fehbg:,link:,subreddit:,fehopt:,file:,directory -- "$@")
+PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:l:r:c:t:f:d:h --long fehbg:,link:,subreddit:,fehopt:,time:,file:,directory -- "$@")
 VALID_ARGUMENTS=$?
 [ "$VALID_ARGUMENTS" != "0" ] && usage
 
@@ -67,6 +68,7 @@ while :; do
         -l | --link)      	link=${2} ; shift 2 ;;
         -r | --subreddit) 	sub=${2} ; shift 2 ;;
         -c | --fehopt)    	custom=${2} ; shift 2 ;;
+        -t | --time) 		time=${2} ; shift 2 ;;
         -f | --file) 		file=${2} ; shift 2 ;;
         -d | --directory) 	dir=${2} ; shift 2 ;;
         -- | '') 			shift; break ;;
@@ -90,18 +92,24 @@ fi
 
 if [ ! -z "$dir" ]; then
     feh+=(--randomize "$dir")
+    while :; do
+        "${feh[@]}"
+        [ ! -z "$time" ] && sleep "$time" || break
+    done &
 elif [ ! -z "$file" ]; then
 	feh+=("$file")
+    "${feh[@]}"
 else
-    if [ "$link" == "reddit" ] || [ ! -z "$sub" ]; then
-        reddit "$sub" &
+    while :; do
+        if [ "$link" == "reddit" ] || [ ! -z "$sub" ]; then
+            reddit "$sub" &
+        else
+            checkInternet && wget --hsts-file="$cachedir/wget-hsts" -q -O "/tmp/nowater.jpg" "$link"
+        fi
         [ -f /tmp/nowater.jpg ] && feh+=("/tmp/nowater.jpg") || feh+=("$nowaterdir/default.jpg")
-    else
-        checkInternet && wget --hsts-file="$cachedir/wget-hsts" -q -O "/tmp/nowater.jpg" "$link"
-        [ -f /tmp/nowater.jpg ] && feh+=("/tmp/nowater.jpg") || feh+=("$nowaterdir/default.jpg")
-    fi
+        "${feh[@]}"
+        [ ! -z "$time" ] && sleep "$time" || break
+    done &
 fi
-
-"${feh[@]}"
 
 exit 0
