@@ -1,16 +1,22 @@
 #!/bin/bash
 
-[ $EUID -eq 0 ] && echo "Do not run this script as root." && exit
+error() { echo "$1" && exit; }
 
-which feh > /dev/null || { echo "This script required feh to work, so install it first!" && exit; }
-which wget > /dev/null || { echo "This script required wget to work, so install it first!" && exit; }
+[ $EUID -eq 0 ] && error "Do not run this script as root."
+
+checkInternet() {
+    wget --hsts-file="$cachedir/wget-hsts" --quiet --spider google.com
+}
+
+which feh > /dev/null || error "This script required feh to work, so install it first!"
+which wget > /dev/null || error "This script required wget to work, so install it first!"
 
 cachedir="$HOME/.cache"
 nowaterdir="$cachedir/nowater"
 default_wp_url="https://raw.githubusercontent.com/justanoobcoder/nowater/master/default.jpg"
 
 [ -d "$nowaterdir" ] || mkdir -p "$nowaterdir"
-[ -f "$nowaterdir/default.jpg" ] || wget --hsts-file="$cachedir/wget-hsts" -T 60 --no-check-certificate -q -P down -O "$nowaterdir/default.jpg" $default_wp_url
+[ -f "$nowaterdir/default.jpg" ] && checkInternet || wget --hsts-file="$cachedir/wget-hsts" -T 60 --no-check-certificate -q -P down -O "$nowaterdir/default.jpg" $default_wp_url
 
 usage() {
     echo "Usage: nowater <option> <argument>
@@ -22,10 +28,6 @@ usage() {
                     [-d | --directory <image directory>]
                     [-h | --help]"
     exit
-}
-
-checkInternet() {
-    wget --hsts-file="$cachedir/wget-hsts" --quiet --spider google.com
 }
 
 reddit() {
@@ -48,10 +50,9 @@ reddit() {
     wait
     size=${#arrURLS[@]}
     if [ $size -eq 0 ]; then
-        echo The current subreddit is not valid
         [ -f /tmp/nowater.jpg ] && feh+=("/tmp/nowater.jpg") || feh+=("$nowaterdir/default.jpg")
         "${feh[@]}"
-        exit
+        error "The current subreddit is not valid."
     fi
     idx=$(($RANDOM % $size))
     target_url=${arrURLS[$idx]}
