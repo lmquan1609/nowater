@@ -7,7 +7,7 @@ all:
 
 install:
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
-	@install -m 755 nowall ${DESTDIR}${PREFIX}/bin/nowall
+	@install -m 755 nowater ${DESTDIR}${PREFIX}/bin/nowater
 
 uninstall:
-	@rm -f ${DESTDIR}${PREFIX}/bin/nowall
+	@rm -f ${DESTDIR}${PREFIX}/bin/nowater
