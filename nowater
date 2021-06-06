@@ -7,7 +7,7 @@ which wget > /dev/null || echo "This script required wget to work, so install it
 
 cachedir="$HOME/.cache"
 nowalldir="$cachedir/nowall"
-default_wp_url="https://gitlab.com/justanoobcoder/dotfiles/-/raw/master/user/pictures/wallpapers/wallpaper5.jpg"
+default_wp_url="https://github.com/justanoobcoder/nowater/blob/master/default.jpg"
 
 [ -d "$nowalldir" ] || mkdir -p "$nowalldir"
 [ -f "$nowalldir/default.jpg" ] || wget --hsts-file="$cachedir/wget-hsts" -T 5 --no-check-certificate -q -P down -O "$nowalldir/default.jpg" $default_wp_url
