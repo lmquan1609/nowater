@@ -112,7 +112,7 @@ elif [ ! -z "$file" ]; then
 else
     while :; do
         if [ "$link" == "reddit" ] || [ ! -z "$sub" ]; then
-            reddit "$sub" &
+            reddit "$sub"
         else
             [ ! -z "$custom_link" ] && link="$custom_link" || unsplash
             checkInternet && wget --hsts-file="$cachedir/wget-hsts" -q -O "/tmp/nowater.jpg" "$link"
