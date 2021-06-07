@@ -1,10 +1,15 @@
 #!/bin/bash
 
+link="https://source.unsplash.com/random/"
+
 error() { echo "$1" && exit; }
 
 [ $EUID -eq 0 ] && error "Do not run this script as root."
 
-checkInternet() { wget --hsts-file="$cachedir/wget-hsts" --quiet --spider google.com; }
+checkInternet() {
+    wget --hsts-file="$cachedir/wget-hsts" --quiet --spider google.com &&
+        return 0 || { echo "No internet!" && return 1;}
+}
 
 which feh > /dev/null || error "This script required feh to work, so install it first!"
 which wget > /dev/null || error "This script required wget to work, so install it first!"
@@ -20,6 +25,7 @@ usage() {
     echo "Usage: nowater <option> <argument>
                     [-b | --fehbg <feh bg opt>]
                     [-c | --fehopt <feh opt>]
+                    [-s | --search <keyword>]
                     [-r | --subreddit <subreddit>]
                     [-l | --link <source>]
                     [-t | --time <cycle time>]
@@ -29,8 +35,14 @@ usage() {
     exit
 }
 
+unsplash() {
+    local search="${search// /_}"
+    link="${link}1920x1080";
+    [ ! -z $search ] && link="${link}/?${search}"
+}
+
 reddit() {
-    checkInternet || { echo "No internet!" && return; }
+    checkInternet || return
 
     [ -f "$nowaterdir/subreddits" ] || printf "wallpaper\nwallpapers" > "$nowaterdir/subreddits"
 
@@ -56,13 +68,14 @@ reddit() {
     wget --hsts-file="$cachedir/wget-hsts" -T 10 --no-check-certificate -q -P down -O "/tmp/nowater.jpg" $target_url &>/dev/null
 }
 
-PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:l:r:c:t:f:d:h --long fehbg:,link:,subreddit:,fehopt:,time:,file:,directory -- "$@")
+PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:l:s:r:c:t:f:d:h --long fehbg:,link:,search:,subreddit:,fehopt:,time:,file:,directory -- "$@")
 [ $? -ne 0 ] && usage
 
 while :; do
     case "${1}" in
         -b | --fehbg)     	bgtype=${2} ; shift 2 ;;
-        -l | --link)      	link=${2} ; shift 2 ;;
+        -l | --link)      	custom_link=${2} ; shift 2 ;;
+        -s | --search)      search=${2} ; shift 2 ;;
         -r | --subreddit) 	sub=${2} ; shift 2 ;;
         -c | --fehopt)    	custom=${2} ; shift 2 ;;
         -t | --time) 		time=${2} ; shift 2 ;;
@@ -101,6 +114,7 @@ else
         if [ "$link" == "reddit" ] || [ ! -z "$sub" ]; then
             reddit "$sub" &
         else
+            [ ! -z "$custom_link" ] && link="$custom_link" || unsplash
             checkInternet && wget --hsts-file="$cachedir/wget-hsts" -q -O "/tmp/nowater.jpg" "$link"
         fi
         [ -f /tmp/nowater.jpg ] && feh+=("/tmp/nowater.jpg") || feh+=("$nowaterdir/default.jpg")
