@@ -120,7 +120,7 @@ else
         [ -f /tmp/nowater.jpg ] && feh+=("/tmp/nowater.jpg") || feh+=("$nowaterdir/default.jpg")
         "${feh[@]}"
         [ ! -z "$time" ] && sleep "$time" || break
-    done
+    done &
 fi
 
 exit 0
