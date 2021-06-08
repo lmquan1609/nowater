@@ -113,7 +113,7 @@ elif [ ! -z "$file" ]; then
 else
     while :; do
         if [ -f /tmp/login.nowall ]; then
-            if [ "$link" == "reddit" ] || [ ! -z "$sub" ]; then
+            if [ "$custom_link" == "reddit" ] || [ ! -z "$sub" ]; then
                 reddit "$sub"
             else
                 [ ! -z "$custom_link" ] && link="$custom_link" || unsplash
