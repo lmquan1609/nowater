@@ -19,7 +19,8 @@ nowaterdir="$cachedir/nowater"
 default_wp_url="https://raw.githubusercontent.com/justanoobcoder/nowater/master/default.jpg"
 
 [ -d "$nowaterdir" ] || mkdir -p "$nowaterdir"
-[ ! -f "$nowaterdir/default.jpg" ] && checkInternet || wget --hsts-file="$cachedir/wget-hsts" -T 60 --no-check-certificate -q -P down -O "$nowaterdir/default.jpg" $default_wp_url
+[ ! -f "$nowaterdir/default.jpg" ] && checkInternet &&
+    wget --hsts-file="$cachedir/wget-hsts" -T 60 --no-check-certificate -q -P down -O "$nowaterdir/default.jpg" $default_wp_url
 
 usage() {
     echo "Usage: nowater <option> <argument>
@@ -105,22 +106,26 @@ if [ ! -z "$dir" ]; then
     while :; do
         "${feh[@]}"
         [ ! -z "$time" ] && sleep "$time" || break
-    done &
+    done
 elif [ ! -z "$file" ]; then
 	feh+=("$file")
     "${feh[@]}"
 else
     while :; do
-        if [ "$link" == "reddit" ] || [ ! -z "$sub" ]; then
-            reddit "$sub"
+        if [ -f /tmp/login.nowall ]; then
+            if [ "$link" == "reddit" ] || [ ! -z "$sub" ]; then
+                reddit "$sub"
+            else
+                [ ! -z "$custom_link" ] && link="$custom_link" || unsplash
+                checkInternet && wget --hsts-file="$cachedir/wget-hsts" -q -O "/tmp/nowater.jpg" "$link"
+            fi
+            "${feh[@]}" "/tmp/nowater.jpg"
         else
-            [ ! -z "$custom_link" ] && link="$custom_link" || unsplash
-            checkInternet && wget --hsts-file="$cachedir/wget-hsts" -q -O "/tmp/nowater.jpg" "$link"
+            "${feh[@]}" "$nowaterdir/default.jpg"
+            touch /tmp/login.nowall
         fi
-        [ -f /tmp/nowater.jpg ] && feh+=("/tmp/nowater.jpg") || feh+=("$nowaterdir/default.jpg")
-        "${feh[@]}"
         [ ! -z "$time" ] && sleep "$time" || break
-    done &
+    done
 fi
 
 exit 0
