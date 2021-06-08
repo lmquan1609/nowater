@@ -29,7 +29,8 @@ $ nowater -s "sea sunset"
 # To set a wallpaper from a raw image link
 $ nowater -l https://raw.githubusercontent.com/justanoobcoder/nowater/master/default.jpg
 
-# To get a random wallpaper from one of the set subreddits (in subreddits file)
+# To get a random wallpaper from one of the set subreddits
+# (in $HOME/.cache/nowater/subreddits file)
 $ nowater -l reddit
 
 # To get a random wallpaper from a custom subreddit
