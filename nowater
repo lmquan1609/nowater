@@ -1,7 +1,5 @@
 #!/bin/bash
 
-link="https://source.unsplash.com/random/"
-
 error() { echo "$1" && exit; }
 
 [ $EUID -eq 0 ] && error "Do not run this script as root."
@@ -17,8 +15,9 @@ which wget > /dev/null || error "This script required wget to work, so install i
 cachedir="$HOME/.cache"
 nowaterdir="$cachedir/nowater"
 default_wp_url="https://raw.githubusercontent.com/justanoobcoder/nowater/master/default.jpg"
+link="https://source.unsplash.com/random/"
 
-[ -d "$nowaterdir" ] || mkdir -p "$nowaterdir"
+[ ! -d "$nowaterdir" ] && mkdir -p "$nowaterdir"
 [ ! -f "$nowaterdir/default.jpg" ] && checkInternet &&
     wget --hsts-file="$cachedir/wget-hsts" -T 60 --no-check-certificate -q -P down -O "$nowaterdir/default.jpg" $default_wp_url
 
@@ -45,14 +44,14 @@ unsplash() {
 reddit() {
     checkInternet || return
 
-    [ -f "$nowaterdir/subreddits" ] || printf "wallpaper\nwallpapers" > "$nowaterdir/subreddits"
+    [ ! -f "$nowaterdir/subreddits" ] && printf "wallpaper\nwallpapers" > "$nowaterdir/subreddits"
 
     readarray subreddits < "$nowaterdir/subreddits"
     a=${#subreddits[@]}
     b=$(($RANDOM % $a))
     sub=${subreddits[$b]}
     sub="$(echo -e "${sub}" | tr -d '[:space:]')"
-    [ -z $1 ] || sub=$1
+    [ ! -z $1 ] && sub=$1
     url="https://www.reddit.com/r/$sub/hot/.json?raw_json=1&t="
     content=`wget --hsts-file="$cachedir/wget-hsts" -T 10 -q -O - $url`
     urls=$(echo -n "$content"| jq -r '.data.children[]|select(.data.post_hint|test("image")?) | .data.preview.images[0].source.url')
@@ -60,8 +59,7 @@ reddit() {
     wait
     size=${#arrURLS[@]}
     if [ $size -eq 0 ]; then
-        [ -f /tmp/nowater.jpg ] && feh+=("/tmp/nowater.jpg") || feh+=("$nowaterdir/default.jpg")
-        "${feh[@]}"
+        [ -f /tmp/nowater.jpg ] && feh+=("/tmp/nowater.jpg") || "${feh[@]}" "$nowaterdir/default.jpg"
         error "The current subreddit is not valid."
     fi
     idx=$(($RANDOM % $size))
@@ -99,17 +97,16 @@ else
     feh+=(--bg-scale)
 fi
 
-[ -z "$custom" ] || feh+=("$custom")
+[ ! -z "$custom" ] && feh+=("$custom")
 
 if [ ! -z "$dir" ]; then
-    feh+=(--randomize "$dir")
+    feh+=(--randomize)
     while :; do
-        "${feh[@]}"
+        "${feh[@]}" "$dir"
         [ ! -z "$time" ] && sleep "$time" || break
     done
 elif [ ! -z "$file" ]; then
-	feh+=("$file")
-    "${feh[@]}"
+	"${feh[@]}" "$file")
 else
     while :; do
         if [ -f /tmp/login.nowall ]; then
