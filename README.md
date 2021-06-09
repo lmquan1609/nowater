@@ -61,5 +61,6 @@ $ nowater -s vietnam -t 10m &   # append & sign to make it run in background
 - Your machine should have internet access at the first time you run this script to download default wallpaper (stored in `$HOME/.cache/nowater` directory).
 - When your machine doesn't have internet access, nowater will use `$HOME/.cache/nowater/default.jpg` as wallpaper.
 - You can change default wallpaper by replacing `$HOME/.cache/nowater/default.jpg` with the wallpaper image you want (must be named as default.jpg).
+- Downloaded wallpaper is saved as `/tmp/nowater.jpg`.
 - Beside 10m (10 minutes) you also can create a loop with 10s (10 seconds) but the cycle time should not be too short because the script needs time to download the images.
 - If you put nowater command with a loop into a startup file, you must append a `&` sign to the command to make it run in background. For example: `nowater -t 5m &`
