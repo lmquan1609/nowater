@@ -106,7 +106,7 @@ if [ ! -z "$dir" ]; then
         [ ! -z "$time" ] && sleep "$time" || break
     done
 elif [ ! -z "$file" ]; then
-	"${feh[@]}" "$file")
+	"${feh[@]}" "$file"
 else
     while :; do
         if [ -f /tmp/login.nowall ]; then
