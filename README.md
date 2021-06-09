@@ -12,7 +12,7 @@ sudo make install
 ```
 
 ## Uninstall
-To uninstall nowater, go to source code folder and and the following command:
+To uninstall nowater, go to source code folder and run the following command:
 ```
 sudo make uninstall
 ```
