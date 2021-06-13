@@ -38,7 +38,7 @@ usage() {
 unsplash() {
     local search="${search// /_}"
     link="${link}1920x1080";
-    [ ! -z $search ] && link="${link}/?${search}"
+    [ -n "$search" ] && link="${link}/?${search}"
 }
 
 reddit() {
@@ -51,7 +51,7 @@ reddit() {
     b=$(($RANDOM % $a))
     sub=${subreddits[$b]}
     sub="$(echo -e "${sub}" | tr -d '[:space:]')"
-    [ ! -z $1 ] && sub=$1
+    [ -n "$1" ] && sub=$1
     url="https://www.reddit.com/r/$sub/hot/.json?raw_json=1&t="
     content=`wget --hsts-file="$cachedir/wget-hsts" -T 10 -q -O - $url`
     urls=$(echo -n "$content"| jq -r '.data.children[]|select(.data.post_hint|test("image")?) | .data.preview.images[0].source.url')
@@ -87,7 +87,7 @@ while :; do
 done
 
 feh=(feh --no-fehbg)
-if [ ! -z "$bgtype" ]; then
+if [ -n "$bgtype" ]; then
     [ "$bgtype" == 'bg-center' ]    && feh+=(--bg-center)
     [ "$bgtype" == 'bg-fill' ]      && feh+=(--bg-fill)
     [ "$bgtype" == 'bg-max' ]       && feh+=(--bg-max)
@@ -97,23 +97,23 @@ else
     feh+=(--bg-scale)
 fi
 
-[ ! -z "$custom" ] && feh+=("$custom")
+[ -n "$custom" ] && feh+=("$custom")
 
-if [ ! -z "$dir" ]; then
+if [ -n "$dir" ]; then
     feh+=(--randomize)
     while :; do
         "${feh[@]}" "$dir"
-        [ ! -z "$time" ] && sleep "$time" || break
+        [ -n "$time" ] && sleep "$time" || break
     done
-elif [ ! -z "$file" ]; then
+elif [ -n "$file" ]; then
 	"${feh[@]}" "$file"
 else
     while :; do
         if [ -f /tmp/login.nowall ]; then
-            if [ "$custom_link" == "reddit" ] || [ ! -z "$sub" ]; then
+            if [ "$custom_link" == "reddit" ] || [ -n "$sub" ]; then
                 reddit "$sub"
             else
-                [ ! -z "$custom_link" ] && link="$custom_link" || unsplash
+                [ -n "$custom_link" ] && link="$custom_link" || unsplash
                 checkInternet && wget --hsts-file="$cachedir/wget-hsts" -q -O "/tmp/nowater.jpg" "$link"
             fi
             "${feh[@]}" "/tmp/nowater.jpg"
@@ -121,7 +121,7 @@ else
             "${feh[@]}" "$nowaterdir/default.jpg"
             touch /tmp/login.nowall
         fi
-        [ ! -z "$time" ] && sleep "$time" || break
+        [ -n "$time" ] && sleep "$time" || break
     done
 fi
 
