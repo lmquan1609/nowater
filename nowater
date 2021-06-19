@@ -96,7 +96,6 @@ if [ ! -z "$bgtype" ]; then
 else
     feh+=(--bg-scale)
 fi
-
 [ ! -z "$custom" ] && feh+=("$custom")
 
 if [ ! -z "$dir" ]; then
