@@ -1,25 +1,23 @@
 #!/bin/bash
 
-error() { echo "$1" && exit; }
-
-[ $EUID -eq 0 ] && error "Do not run this script as root."
+error() { echo -e "$1" && exit; }
 
 checkInternet() {
-    wget --hsts-file="$cachedir/wget-hsts" --quiet --spider google.com &&
+    wget --hsts-file="$_cacheDir/wget-hsts" --quiet --spider google.com &&
         return 0 || { echo "No internet!" && return 1;}
 }
 
-which feh > /dev/null || error "This script required feh to work, so install it first!"
-which wget > /dev/null || error "This script required wget to work, so install it first!"
-
-cachedir="$HOME/.cache"
-nowaterdir="$cachedir/nowater"
-default_wp_url="https://raw.githubusercontent.com/justanoobcoder/nowater/master/default.jpg"
-link="https://source.unsplash.com/random/"
-
-[ ! -d "$nowaterdir" ] && mkdir -p "$nowaterdir"
-[ ! -f "$nowaterdir/default.jpg" ] && checkInternet &&
-    wget --hsts-file="$cachedir/wget-hsts" -T 60 --no-check-certificate -q -P down -O "$nowaterdir/default.jpg" $default_wp_url
+setup() {
+    which feh > /dev/null || error "This script required feh to work, so install it first!"
+    which wget > /dev/null || error "This script required wget to work, so install it first!"
+    _cacheDir="$HOME/.cache"
+    _nowaterDir="$_cacheDir/nowater"
+    _default_wp_url="https://raw.githubusercontent.com/justanoobcoder/nowater/master/default.jpg"
+    _link="https://source.unsplash.com/random/"
+    [ ! -d "$_nowaterDir" ] && mkdir -p "$_nowaterDir"
+    [ ! -f "$_nowaterDir/default.jpg" ] && checkInternet &&
+        wget --hsts-file="$_cacheDir/wget-hsts" -T 60 --no-check-certificate -q -P down -O "$_nowaterDir/default.jpg" $_default_wp_url
+}
 
 usage() {
     echo "Usage: nowater <option> <argument>
@@ -30,99 +28,137 @@ usage() {
                     [-l | --link <source>]
                     [-t | --time <cycle time>]
                     [-f | --file <image file>]
+                    [-v | --video <video file>]
                     [-d | --directory <image directory>]
+                    [-k | --kill]
                     [-h | --help]"
     exit
 }
 
+get_args() {
+    while :; do
+        case "$1" in
+            -b | --fehbg)       _bgtype=${2} ; shift 2 ;;
+            -c | --fehopt)      _custom=${2} ; shift 2 ;;
+            -l | --link)        _custom_link=${2} ; shift 2 ;;
+            -s | --search)      _search=${2} ; shift 2 ;;
+            -r | --subreddit)   _sub=${2} ; shift 2 ;;
+            -t | --time)        _time=${2} ; shift 2 ;;
+            -f | --file)        _file=${2} ; shift 2 ;;
+            -d | --directory)   _dir=${2} ; shift 2 ;;
+            -v | --video)       _video=${2} ; shift 2 ;;
+            -k | --kill)        killall "${0##*/}"; exit ;;
+            -h | --help)        usage ;;
+            -- | '')            shift; break ;;
+            *) echo "Unexpected option: $1 is not a valid option." ; usage ;;
+        esac
+    done
+}
+
 unsplash() {
-    local search="${search// /_}"
-    link="${link}1920x1080";
-    [ -n "$search" ] && link="${link}/?${search}"
+    local _search="${_search// /_}"
+    _link="${_link}1920x1080";
+    [ -n "$_search" ] && _link="${_link}/?${_search}"
 }
 
 reddit() {
     checkInternet || return
 
-    [ ! -f "$nowaterdir/subreddits" ] && printf "wallpaper\nwallpapers" > "$nowaterdir/subreddits"
+    [ ! -f "$_nowaterDir/subreddits" ] && printf "wallpaper\nwallpapers" > "$_nowaterDir/subreddits"
 
-    readarray subreddits < "$nowaterdir/subreddits"
-    a=${#subreddits[@]}
+    readarray subreddits < "$_nowaterDir/subreddits"
+    a=${#_subreddits[@]}
     b=$(($RANDOM % $a))
-    sub=${subreddits[$b]}
-    sub="$(echo -e "${sub}" | tr -d '[:space:]')"
-    [ -n "$1" ] && sub=$1
-    url="https://www.reddit.com/r/$sub/hot/.json?raw_json=1&t="
-    content=`wget --hsts-file="$cachedir/wget-hsts" -T 10 -q -O - $url`
-    urls=$(echo -n "$content"| jq -r '.data.children[]|select(.data.post_hint|test("image")?) | .data.preview.images[0].source.url')
-    arrURLS=($urls)
+    _sub=${_subreddits[$b]}
+    _sub="$(echo -e "${_sub}" | tr -d '[:space:]')"
+    [ -n "$1" ] && _sub=$1
+    _url="https://www.reddit.com/r/$_sub/hot/.json?raw_json=1&t="
+    _content=`wget --hsts-file="$_cacheDir/wget-hsts" -T 10 -q -O - $_url`
+    _urls=$(echo -n "$_content"| jq -r '.data.children[]|select(.data.post_hint|test("image")?) | .data.preview.images[0].source.url')
+    _arrURLS=($_urls)
     wait
-    size=${#arrURLS[@]}
-    if [ $size -eq 0 ]; then
-        [ -f /tmp/nowater.jpg ] && feh+=("/tmp/nowater.jpg") || "${feh[@]}" "$nowaterdir/default.jpg"
+    _size=${#_arrURLS[@]}
+    if [ $_size -eq 0 ]; then
+        [ -f /tmp/nowater.jpg ] && _feh+=("/tmp/nowater.jpg") || "${_feh[@]}" "$_nowaterDir/default.jpg"
         error "The current subreddit is not valid."
     fi
-    idx=$(($RANDOM % $size))
-    target_url=${arrURLS[$idx]}
-    wget --hsts-file="$cachedir/wget-hsts" -T 10 --no-check-certificate -q -P down -O "/tmp/nowater.jpg" $target_url &>/dev/null
+    idx=$(($RANDOM % $_size))
+    _target_url=${_arrURLS[$idx]}
+    wget --hsts-file="$_cacheDir/wget-hsts" -T 10 --no-check-certificate -q -P down -O "/tmp/nowater.jpg" $_target_url &>/dev/null
 }
 
-PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:l:s:r:c:t:f:d:h --long fehbg:,link:,search:,subreddit:,fehopt:,time:,file:,directory -- "$@")
-[ $? -ne 0 ] && usage
+bgtypeFunc() {
+    [ "$_bgtype" == "bg-center" ]    && _feh+=(--bg-center)
+    [ "$_bgtype" == "bg-fill" ]      && _feh+=(--bg-fill)
+    [ "$_bgtype" == "bg-max" ]       && _feh+=(--bg-max)
+    [ "$_bgtype" == "bg-scale" ]     && _feh+=(--bg-scale)
+    [ "$_bgtype" == "bg-tile" ]      && _feh+=(--bg-tile)
+}
 
-while :; do
-    case "${1}" in
-        -b | --fehbg)     	bgtype=${2} ; shift 2 ;;
-        -l | --link)      	custom_link=${2} ; shift 2 ;;
-        -s | --search)      search=${2} ; shift 2 ;;
-        -r | --subreddit) 	sub=${2} ; shift 2 ;;
-        -c | --fehopt)    	custom=${2} ; shift 2 ;;
-        -t | --time) 		time=${2} ; shift 2 ;;
-        -f | --file) 		file=${2} ; shift 2 ;;
-        -d | --directory) 	dir=${2} ; shift 2 ;;
-        -- | '')            shift; break ;;
-        -h | --help)        usage ;;
-        *) echo "Unexpected option: $1 is not a valid option." ; usage ;;
-    esac
-done
+videoFunc() {
+    _video_dir="$_nowaterDir/video"
+    [ ! -d "$_video_dir" ] && mkdir -p "$_video_dir"
 
-feh=(feh --no-fehbg)
-if [ -n "$bgtype" ]; then
-    [ "$bgtype" == 'bg-center' ]    && feh+=(--bg-center)
-    [ "$bgtype" == 'bg-fill' ]      && feh+=(--bg-fill)
-    [ "$bgtype" == 'bg-max' ]       && feh+=(--bg-max)
-    [ "$bgtype" == 'bg-scale' ]     && feh+=(--bg-scale)
-    [ "$bgtype" == 'bg-tile' ]      && feh+=(--bg-tile)
-else
-    feh+=(--bg-scale)
-fi
+    ffmpeg -y -ss 00:00 -i "$_video" -t 10 "$_video_dir/videoframe%05d.jpg" > "$_video_dir/video.info" 2>&1
+    _frameCount=$(ls "$_video_dir"/*.jpg | wc -l)
+    echo "$_video" > "$_video_dir/video.info"
 
-[ -n "$custom" ] && feh+=("$custom")
-
-if [ -n "$dir" ]; then
-    feh+=(--randomize)
-    while :; do
-        "${feh[@]}" "$dir"
-        [ -n "$time" ] && sleep "$time" || break
+    for ((i=1; ; ++i)); do
+        [ $i -gt $_frameCount ] && i=1              
+        "${_feh[@]}" $(ls -1 "$_video_dir/"*.jpg | sed -n "${i}p")
+        sleep 0.01
     done
-elif [ -n "$file" ]; then
-	"${feh[@]}" "$file"
-else
+}
+
+directoryFunc() {
+    _feh+=(--randomize)
+    while :; do
+        "${_feh[@]}" "$_dir"
+        [ -n "$_time" ] && sleep "$_time" || break
+    done
+}
+
+onlineFunc() {
     while :; do
         if [ -f /tmp/login.nowall ]; then
-            if [ "$custom_link" == "reddit" ] || [ -n "$sub" ]; then
-                reddit "$sub"
+            if [ "$_custom_link" == "reddit" ] || [ -n "$_sub" ]; then
+                reddit "$_sub"
             else
-                [ -n "$custom_link" ] && link="$custom_link" || unsplash
-                checkInternet && wget --hsts-file="$cachedir/wget-hsts" -q -O "/tmp/nowater.jpg" "$link"
+                [ -n "$_custom_link" ] && _link="$_custom_link" || unsplash
+                checkInternet && wget --hsts-file="$_cacheDir/wget-hsts" -q -O "/tmp/nowater.jpg" "$_link"
             fi
-            "${feh[@]}" "/tmp/nowater.jpg"
+            "${_feh[@]}" "/tmp/nowater.jpg"
         else
-            "${feh[@]}" "$nowaterdir/default.jpg"
+            "${_feh[@]}" "$_nowaterDir/default.jpg"
             touch /tmp/login.nowall
         fi
-        [ -n "$time" ] && sleep "$time" || break
+        [ -n "$_time" ] && sleep "$_time" || break
     done
-fi
+}
 
-exit 0
+main() {
+    [ $EUID -eq 0 ] && error "Do not run this script as root."
+
+    setup
+    get_args "$@"
+
+    _feh=(feh --no-fehbg)
+    [ -n "$_bgtype" ] && bgtypeFunc || _feh+=(--bg-scale)
+    [ -n "$_custom" ] && _feh+=($_custom)
+    if [ -n "$_video" ]; then
+        videoFunc &
+    else {
+        if [ -n "$_dir" ]; then
+            directoryFunc &
+        elif [ -n "$_file" ]; then
+            "${_feh[@]}" "$_file"
+        else
+            onlineFunc &
+        fi
+    }
+    fi
+
+    return 0
+}
+
+main "$@"
