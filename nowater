@@ -30,16 +30,16 @@ usage() {
     echo "Usage: nowater <option> <argument>
                     [-b | --fehbg <feh bg opt>]
                     [-c | --fehopt <feh opt>]
+                    [-l | --link <source>]
                     [-s | --search <keyword>]
                     [-r | --subreddit <subreddit>]
-                    [-l | --link <source>]
                     [-t | --time <cycle time>]
                     [-f | --file <image file>]
+                    [-d | --directory <image directory>]
                     [-v | --video <video file>]
                     [-F | --fps <frame per second>]
                     [-D | --duration <duration time>]
                     [-p | --position <start point of video>]
-                    [-d | --directory <image directory>]
                     [-k | --kill]
                     [-h | --help]"
     exit
@@ -120,7 +120,7 @@ videoFunc() {
     [ -z "$_duration" ] && _duration=10
     [ -z "$_position" ] && _position="00:00"
 
-    ffmpeg -y -ss "$_position" -i "$_video" -t $_duration -vf fps=$_fps "$_video_dir/videoframe%06d.jpg" > "$_video_dir/video.info" 2>&1
+    ffmpeg -y -ss "$_position" -i "$_video" -t $_duration -vf fps=$_fps "$_video_dir/videoframe%06d.jpg" -loglevel error
     _frameCount=$(ls "$_video_dir"/*.jpg | wc -l)
     echo "$_video" > "$_video_dir/video.info"
 
