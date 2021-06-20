@@ -36,6 +36,7 @@ usage() {
                     [-t | --time <cycle time>]
                     [-f | --file <image file>]
                     [-v | --video <video file>]
+                    [-F | --fps <frame per second>]
                     [-d | --directory <image directory>]
                     [-k | --kill]
                     [-h | --help]"
@@ -43,8 +44,8 @@ usage() {
 }
 
 get_args() {
-    PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:c:l:s:r:t:f:d:v:kh \
-        -l fehbg:,fehopt:,link:,search:,subreddit:,time:,file:,directory:,video:,kill,help -- "$@")
+    PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:c:l:s:r:t:f:d:v:F:kh \
+        -l fehbg:,fehopt:,link:,search:,subreddit:,time:,file:,directory:,video:,fps:,kill,help -- "$@")
     [ $? -ne 0 ] && usage
 
     while :; do
@@ -58,6 +59,7 @@ get_args() {
             -f | --file)        _file=${2} ; shift 2 ;;
             -d | --directory)   _dir=${2} ; shift 2 ;;
             -v | --video)       _video=${2} ; shift 2 ;;
+            -F | --fps)         _fps=${2} ; shift 2 ;;
             -k | --kill)        killall "${0##*/}"; exit ;;
             -h | --help)        usage ;;
             -- | '')            shift; break ;;
@@ -108,9 +110,10 @@ bgtypeFunc() {
 
 videoFunc() {
     _video_dir="$_nowaterDir/video"
-    [ ! -d "$_video_dir" ] && mkdir -p "$_video_dir"
+    [ ! -d "$_video_dir" ] && mkdir -p "$_video_dir" || rm -rf "$_video_dir"/*
 
-    ffmpeg -y -ss 00:00 -i "$_video" -t 10 "$_video_dir/videoframe%05d.jpg" > "$_video_dir/video.info" 2>&1
+    [ -z "$_fps" ] && _fps=23
+    ffmpeg -y -ss 00:00 -i "$_video" -t 10 -vf fps=$_fps "$_video_dir/videoframe%05d.jpg" > "$_video_dir/video.info" 2>&1
     _frameCount=$(ls "$_video_dir"/*.jpg | wc -l)
     echo "$_video" > "$_video_dir/video.info"
 
