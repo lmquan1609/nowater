@@ -2,14 +2,21 @@
 
 error() { echo -e "$1" && exit; }
 
+checkDependency() {
+    which "$1" > /dev/null || error "This script required $1 to work, so install it first!"
+}
+
 checkInternet() {
     wget --hsts-file="$_cacheDir/wget-hsts" --quiet --spider google.com &&
         return 0 || { echo "No internet!" && return 1;}
 }
 
 setup() {
-    which feh > /dev/null || error "This script required feh to work, so install it first!"
-    which wget > /dev/null || error "This script required wget to work, so install it first!"
+	checkDependency feh
+    checkDependency wget
+    checkDependency jq
+    checkDependency ffmpeg
+    checkDependency sed
     _cacheDir="$HOME/.cache"
     _nowaterDir="$_cacheDir/nowater"
     _default_wp_url="https://raw.githubusercontent.com/justanoobcoder/nowater/master/default.jpg"
@@ -70,7 +77,7 @@ reddit() {
 
     [ ! -f "$_nowaterDir/subreddits" ] && printf "wallpaper\nwallpapers" > "$_nowaterDir/subreddits"
 
-    readarray subreddits < "$_nowaterDir/subreddits"
+    readarray _subreddits < "$_nowaterDir/subreddits"
     a=${#_subreddits[@]}
     b=$(($RANDOM % $a))
     _sub=${_subreddits[$b]}
