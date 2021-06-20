@@ -23,7 +23,8 @@ setup() {
     _link="https://source.unsplash.com/random/"
     [ ! -d "$_nowaterDir" ] && mkdir -p "$_nowaterDir"
     [ ! -f "$_nowaterDir/default.jpg" ] && checkInternet &&
-        wget --hsts-file="$_cacheDir/wget-hsts" -T 60 --no-check-certificate -q -P down -O "$_nowaterDir/default.jpg" $_default_wp_url
+        wget --hsts-file="$_cacheDir/wget-hsts" -T 60 --no-check-certificate \
+        -q -P down -O "$_nowaterDir/default.jpg" $_default_wp_url
 }
 
 usage() {
@@ -91,7 +92,7 @@ reddit() {
     [ -n "$1" ] && _sub=$1
     _url="https://www.reddit.com/r/$_sub/hot/.json?raw_json=1&t="
     _content=`wget --hsts-file="$_cacheDir/wget-hsts" -T 10 -q -O - $_url`
-    _urls=$(echo -n "$_content"| jq -r '.data.children[]|select(.data.post_hint|test("image")?) | .data.preview.images[0].source.url')
+    _urls=$(echo -n "$_content" | jq -r '.data.children[]|select(.data.post_hint|test("image")?) | .data.preview.images[0].source.url')
     _arrURLS=($_urls)
     wait
     _size=${#_arrURLS[@]}
@@ -101,7 +102,8 @@ reddit() {
     fi
     idx=$(($RANDOM % $_size))
     _target_url=${_arrURLS[$idx]}
-    wget --hsts-file="$_cacheDir/wget-hsts" -T 10 --no-check-certificate -q -P down -O "/tmp/nowater.jpg" $_target_url &>/dev/null
+    wget --hsts-file="$_cacheDir/wget-hsts" -T 10 --no-check-certificate \
+        -q -P down -O "/tmp/nowater.jpg" $_target_url &>/dev/null
 }
 
 bgtypeFunc() {
@@ -112,17 +114,32 @@ bgtypeFunc() {
     [ "$_bgtype" == "bg-tile" ]      && _feh+=(--bg-tile)
 }
 
+checkVideoInfo() {
+    [ "$(sed -n 1p $_video_dir/video.info 2> /dev/null)" == "$1" ] &&
+    [ "$(sed -n 2p $_video_dir/video.info 2> /dev/null)" == "$2" ] &&
+    [ "$(sed -n 3p $_video_dir/video.info 2> /dev/null)" == "$3" ] &&
+    [ "$(sed -n 4p $_video_dir/video.info 2> /dev/null)" == "$4" ]
+}
+
 videoFunc() {
     _video_dir="$_nowaterDir/video"
-    [ ! -d "$_video_dir" ] && mkdir -p "$_video_dir" || rm -rf "$_video_dir"/*
+    [ ! -d "$_video_dir" ] && mkdir -p "$_video_dir"
 
     [ -z "$_fps" ] && _fps=23
     [ -z "$_duration" ] && _duration=10
     [ -z "$_position" ] && _position="00:00"
 
-    ffmpeg -y -ss "$_position" -i "$_video" -t $_duration -vf fps=$_fps "$_video_dir/videoframe%06d.jpg" -loglevel error
+    checkVideoInfo "$_video" "$_fps" "$_duration" "$_position" || {
+        rm -rf "$_video_dir"/*
+        ffmpeg -y -ss "$_position" -i "$_video" -t $_duration -vf fps=$_fps \
+            "$_video_dir/videoframe%06d.jpg" -loglevel error
+    }
     _frameCount=$(ls "$_video_dir"/*.jpg | wc -l)
+
     echo "$_video" > "$_video_dir/video.info"
+    echo "$_fps" >> "$_video_dir/video.info"
+    echo "$_duration" >> "$_video_dir/video.info"
+    echo "$_position" >> "$_video_dir/video.info"
 
     for ((i=1; ; ++i)); do
         [ $i -gt $_frameCount ] && i=1              
