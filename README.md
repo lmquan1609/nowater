@@ -56,8 +56,8 @@ $ nowater -d </path/to/dir>
 $ nowater -d ~/Pictures/Wallpapers/
 
 # To get a live wallpaper from a short video
-$ nowater -v </path/to/video/file>
-$ nowater -v ~/Videos/video.mp4     # nowater only supports mp4 format
+$ nowater -V </path/to/video/file>
+$ nowater -V ~/Videos/video.mp4     # nowater only supports mp4 format
 
 # To create a loop
 $ nowater -t <cycle time>
