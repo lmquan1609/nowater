@@ -37,6 +37,8 @@ usage() {
                     [-f | --file <image file>]
                     [-v | --video <video file>]
                     [-F | --fps <frame per second>]
+                    [-D | --duration <duration time>]
+                    [-p | --position <start point of video>]
                     [-d | --directory <image directory>]
                     [-k | --kill]
                     [-h | --help]"
@@ -44,8 +46,8 @@ usage() {
 }
 
 get_args() {
-    PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:c:l:s:r:t:f:d:v:F:kh \
-        -l fehbg:,fehopt:,link:,search:,subreddit:,time:,file:,directory:,video:,fps:,kill,help -- "$@")
+    PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:c:l:s:r:t:f:d:v:F:D:p:kh \
+        -l fehbg:,fehopt:,link:,search:,subreddit:,time:,file:,directory:,video:,fps:,duration:,position:,kill,help -- "$@")
     [ $? -ne 0 ] && usage
 
     while :; do
@@ -60,6 +62,8 @@ get_args() {
             -d | --directory)   _dir=${2} ; shift 2 ;;
             -v | --video)       _video=${2} ; shift 2 ;;
             -F | --fps)         _fps=${2} ; shift 2 ;;
+            -D | --duration)    _duration=${2} ; shift 2 ;;
+            -p | --position)    _position=${2} ; shift 2 ;;
             -k | --kill)        killall "${0##*/}"; exit ;;
             -h | --help)        usage ;;
             -- | '')            shift; break ;;
@@ -113,7 +117,10 @@ videoFunc() {
     [ ! -d "$_video_dir" ] && mkdir -p "$_video_dir" || rm -rf "$_video_dir"/*
 
     [ -z "$_fps" ] && _fps=23
-    ffmpeg -y -ss 00:00 -i "$_video" -t 10 -vf fps=$_fps "$_video_dir/videoframe%05d.jpg" > "$_video_dir/video.info" 2>&1
+    [ -z "$_duration" ] && _duration=10
+    [ -z "$_position" ] && _position="00:00"
+
+    ffmpeg -y -ss "$_position" -i "$_video" -t $_duration -vf fps=$_fps "$_video_dir/videoframe%06d.jpg" > "$_video_dir/video.info" 2>&1
     _frameCount=$(ls "$_video_dir"/*.jpg | wc -l)
     echo "$_video" > "$_video_dir/video.info"
 
