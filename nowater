@@ -1,5 +1,7 @@
 #!/bin/bash
 
+version="21.06"
+
 error() { echo -e "$1" && exit; }
 
 checkDependency() {
@@ -37,18 +39,19 @@ usage() {
                     [-t | --time <cycle time>]
                     [-f | --file <image file>]
                     [-d | --directory <image directory>]
-                    [-v | --video <video file>]
+                    [-V | --video <video file>]
                     [-F | --fps <frame per second>]
                     [-D | --duration <duration time>]
                     [-p | --position <start point of video>]
                     [-k | --kill]
+                    [-v | --version]
                     [-h | --help]"
     exit
 }
 
 get_args() {
-    PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:c:l:s:r:t:f:d:v:F:D:p:kh \
-        -l fehbg:,fehopt:,link:,search:,subreddit:,time:,file:,directory:,video:,fps:,duration:,position:,kill,help -- "$@")
+    PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:c:l:s:r:t:f:d:V:F:D:p:kvh \
+        -l fehbg:,fehopt:,link:,search:,subreddit:,time:,file:,directory:,video:,fps:,duration:,position:,kill,version,help -- "$@")
     [ $? -ne 0 ] && usage
 
     while :; do
@@ -61,11 +64,12 @@ get_args() {
             -t | --time)        _time=${2} ; shift 2 ;;
             -f | --file)        _file=${2} ; shift 2 ;;
             -d | --directory)   _dir=${2} ; shift 2 ;;
-            -v | --video)       _video=${2} ; shift 2 ;;
+            -V | --video)       _video=${2} ; shift 2 ;;
             -F | --fps)         _fps=${2} ; shift 2 ;;
             -D | --duration)    _duration=${2} ; shift 2 ;;
             -p | --position)    _position=${2} ; shift 2 ;;
             -k | --kill)        killall "${0##*/}"; exit ;;
+            -v | --version)     echo "nowater v$version"; exit ;;
             -h | --help)        usage ;;
             -- | '')            shift; break ;;
             *) echo "Unexpected option: $1 is not a valid option." ; usage ;;
