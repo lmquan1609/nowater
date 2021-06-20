@@ -67,6 +67,7 @@ $ nowater -s vietnam -t 10m         # change wallpaper every 10 minutes
 ## Tips and tricks
 - There would be a short delay after you run nowater to set an online wallpaper because it takes time to download images.
 - Live wallpaper feature only supports mp4 format videos, and it only repeats first 10 seconds of the video.
+- Kill nowater process (if you're using nowater with loop or live wallpaper) before running it again. To kill nowater process, run this following command: `nowater -k`
 - Your machine should have internet access at the first time you run this script to download default wallpaper (stored in `~/.cache/nowater` directory).
 - When your machine doesn't have internet access, nowater will use `~/.cache/nowater/default.jpg` as wallpaper.
 - You can change default wallpaper by replacing `~/.cache/nowater/default.jpg` with the wallpaper image you want (must be named as default.jpg).
