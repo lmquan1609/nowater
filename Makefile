@@ -4,6 +4,7 @@ PREFIX = /usr/local
 
 all:
 	@echo "Run 'sudo make install' to install nowater."
+	@echo "Run 'sudo make uninstall' to uninstall nowater."
 
 install:
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
