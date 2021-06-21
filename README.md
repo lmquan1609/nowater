@@ -10,7 +10,7 @@ git clone https://github.com/justanoobcoder/nowater.git
 cd nowater
 sudo make install
 ```
-For Arch Linux, nowater can be install from [AUR](https://aur.archlinux.org/packages/nowater/).
+For Arch Linux, nowater can be installed from [AUR](https://aur.archlinux.org/packages/nowater/).
 
 ## Uninstall
 To uninstall nowater, go to source code folder and run the following command:
