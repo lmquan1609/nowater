@@ -16,6 +16,7 @@ To uninstall nowater, go to source code folder and run the following command:
 ```
 sudo make uninstall
 ```
+For Arch Linux, nowater can be install from [AUR](https://aur.archlinux.org/packages/nowater/).
 
 ## Usage
 ```
