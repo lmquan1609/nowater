@@ -135,7 +135,7 @@ videoFunc() {
 
     checkVideoInfo "$_video" "$_fps" "$_duration" "$_position" || {
         rm -rf "$_video_dir"/*
-        ffmpeg -y -ss "$_position" -i "$_video" -t $_duration -vf fps=$_fps \
+        ffmpeg -y -ss "$_position" -i "$_video" -t $_duration -q:v 4 -vf fps=$_fps \
             "$_video_dir/videoframe%06d.jpg" -loglevel error
     }
     _frameCount=$(ls "$_video_dir"/*.jpg | wc -l)
