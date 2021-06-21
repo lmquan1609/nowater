@@ -1,5 +1,5 @@
 # Nowater - Noah's wallpaper setter
-Nowater is a command line interface tool that helps you change wallpaper easily. This script is based on [styli.sh](https://github.com/thevinter/styli.sh) but heavily modified. Nowater can search for specific wallpapers from [unsplash](https://unsplash.com/) or download a random image from the specified subreddits. It can also set a short video as a live wallpaper.
+Nowater is a command line interface tool that helps you set wallpaper or live wallpaper easily for X11. This script is based on [styli.sh](https://github.com/thevinter/styli.sh) but heavily modified. Nowater can search for specific wallpapers from [unsplash](https://unsplash.com/) or download a random image from the specified subreddits. It can also set a short video as a live wallpaper.
 
 ## Requirements
 You need to install `feh`, `wget`, `jq`, `ffmpeg`, `sed` first before running this script.
