@@ -1,10 +1,13 @@
 # Nowater - Noah's wallpaper setter
-Nowater is a command line interface tool that helps you set wallpaper or live wallpaper easily for X11. This script is based on [styli.sh](https://github.com/thevinter/styli.sh) but heavily modified. Nowater can search for specific wallpapers from [unsplash](https://unsplash.com/) or download a random image from the specified subreddits. It can also set a short video as a live wallpaper.
+Nowater is a command line interface tool that helps you set wallpaper or live wallpaper easily for X11. This script is based on [styli.sh](https://github.com/thevinter/styli.sh) and [dynamic-wallpaper](https://github.com/adi1090x/dynamic-wallpaper) but heavily modified. Nowater can search for specific wallpapers from [unsplash](https://unsplash.com/) or download a random image from the specified subreddits. It can also set a short video as a live wallpaper.
 
 ## Requirements
 You need to install `feh`, `wget`, `jq`, `ffmpeg`, `sed` first before running this script.
 
 ## Install
+For Arch Linux, nowater can be installed from [AUR](https://aur.archlinux.org/packages/nowater/).
+
+For other distros, nowater can be installed using `make`:
 ```
 git clone https://github.com/justanoobcoder/nowater.git
 cd nowater
@@ -16,7 +19,6 @@ To uninstall nowater, go to source code folder and run the following command:
 ```
 sudo make uninstall
 ```
-For Arch Linux, nowater can be install from [AUR](https://aur.archlinux.org/packages/nowater/).
 
 ## Usage
 ```
@@ -30,10 +32,10 @@ $ nowater -s "sea sunset"
 
 # To set a wallpaper from a raw image link
 $ nowater -l <image url>
-$ nowater -l https://raw.githubusercontent.com/justanoobcoder/nowater/master/default.jpg
+$ nowater -l https://www.ixpap.com/images/2021/03/tanjiro-wallpaper-ixpap-6.jpg
 
 # To get a random wallpaper from one of the set subreddits
-# (in $HOME/.cache/nowater/subreddits file)
+# (in ~/.cache/nowater/subreddits file)
 $ nowater -l reddit
 
 # To get a random wallpaper from a custom subreddit
@@ -58,19 +60,26 @@ $ nowater -d ~/Pictures/Wallpapers/
 
 # To get a live wallpaper from a short video
 $ nowater -V </path/to/video/file>
-$ nowater -V ~/Videos/video.mp4     # nowater only supports mp4 format
+$ nowater -V ~/Videos/video.mp4     # for now, nowater only supports mp4 format
 
 # To create a loop
 $ nowater -t <cycle time>
 $ nowater -s vietnam -t 10m         # change wallpaper every 10 minutes
+$ nowater -d ~/Pictures/Wallpapers/ -t 30s      # change wallpaper every 30 seconds
+
+# To see more options
+$ nowater -h
 ```
+Set wallpapers according to current time: `nowater -T`
+![gif](https://raw.githubusercontent.com/justanoobcoder/nowater/dev/nowater.gif)
+
+## Attention
+- If you run nowater with loop (-t option) or live wallpaper (-V option), you must kill nowater process before running it again. Nowater can be killed by running `nowater -k` or `nowater --kill`.
+- Live wallpaper is cool but your CPU may not like it, so I don't recommend to use it.
 
 ## Tips and tricks
 - There would be a short delay after you run nowater to set an online wallpaper because it takes time to download images.
-- Live wallpaper feature only supports mp4 format videos, and it only repeats first 10 seconds of the video.
-- Kill nowater process (if you're using nowater with loop or live wallpaper) before running it again. To kill nowater process, run this following command: `nowater -k`
-- Your machine should have internet access at the first time you run this script to download default wallpaper (stored in `~/.cache/nowater` directory).
-- When your machine doesn't have internet access, nowater will use `~/.cache/nowater/default.jpg` as wallpaper.
-- You can change default wallpaper by replacing `~/.cache/nowater/default.jpg` with the wallpaper image you want (must be named as default.jpg).
+- Live wallpaper feature only supports mp4 format videos.
+- When your machine doesn't have internet access, nowater will use `/usr/local/share/nowater/images/default-wallpaper.png` as default wallpaper (if you want to set an online wallpaper).
 - Downloaded wallpaper is saved as `/tmp/nowater.jpg`.
-- Beside 10m (10 minutes) you also can create a loop with 10s (10 seconds) but the cycle time should not be too short because the script needs time to download the images.
+- To set a loop, you need to pass `-t Nm` or `-t Ns`, N is a positive number, m for minutes, s for seconds. Loop feature only works with -r, -d and -s option.
