@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="21.06"
+_version="21.07"
 
 error() { echo -e "$1" && exit; }
 
@@ -27,12 +27,13 @@ setup() {
     [ ! -f "$_nowaterDir/default.jpg" ] && checkInternet &&
         wget --hsts-file="$_cacheDir/wget-hsts" -T 60 --no-check-certificate \
         -q -P down -O "$_nowaterDir/default.jpg" $_default_wp_url
+    _imgsDir="./images"
 }
 
 usage() {
     echo "Usage: nowater <option> <argument>
-                    [-b | --fehbg <feh bg opt>]
-                    [-c | --fehopt <feh opt>]
+                    [-b | --bgtype <feh bg opt>]
+                    [-c | --custom <feh opt>]
                     [-l | --link <source>]
                     [-s | --search <keyword>]
                     [-r | --subreddit <subreddit>]
@@ -43,6 +44,7 @@ usage() {
                     [-F | --fps <frame per second>]
                     [-D | --duration <duration time>]
                     [-p | --position <start point of video>]
+                    [-T | --time-of-day]
                     [-k | --kill]
                     [-v | --version]
                     [-h | --help]"
@@ -50,14 +52,14 @@ usage() {
 }
 
 get_args() {
-    PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:c:l:s:r:t:f:d:V:F:D:p:kvh \
-        -l fehbg:,fehopt:,link:,search:,subreddit:,time:,file:,directory:,video:,fps:,duration:,position:,kill,version,help -- "$@")
+    PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:c:l:s:r:t:f:d:V:F:D:p:Tkvh \
+        -l bgtype:,custom:,link:,search:,subreddit:,time:,file:,directory:,video:,fps:,duration:,position:,time-of-day,kill,version,help -- "$@")
     [ $? -ne 0 ] && usage
 
     while :; do
         case "$1" in
-            -b | --fehbg)       _bgtype=${2} ; shift 2 ;;
-            -c | --fehopt)      _custom=${2} ; shift 2 ;;
+            -b | --bgtype)      _bgtype=${2} ; shift 2 ;;
+            -c | --custom)      _custom=${2} ; shift 2 ;;
             -l | --link)        _custom_link=${2} ; shift 2 ;;
             -s | --search)      _search=${2} ; shift 2 ;;
             -r | --subreddit)   _sub=${2} ; shift 2 ;;
@@ -68,8 +70,9 @@ get_args() {
             -F | --fps)         _fps=${2} ; shift 2 ;;
             -D | --duration)    _duration=${2} ; shift 2 ;;
             -p | --position)    _position=${2} ; shift 2 ;;
+            -T | --time-of-day) _isTimeOfDay="true" ; shift ;;
             -k | --kill)        killall "${0##*/}"; exit ;;
-            -v | --version)     echo "nowater v$version"; exit ;;
+            -v | --version)     echo "nowater v$_version"; exit ;;
             -h | --help)        usage ;;
             -- | '')            shift; break ;;
             *) echo "Unexpected option: $1 is not a valid option." ; usage ;;
@@ -178,6 +181,14 @@ onlineFunc() {
     done
 }
 
+timeOfDayFunc() {
+    while :; do
+        _hour=`date +%k`
+        "${_feh[@]}" /usr/local/share/nowater/images/$_hour.png
+        sleep 10m
+    done
+}
+
 main() {
     [ $EUID -eq 0 ] && error "Do not run this script as root."
 
@@ -194,6 +205,8 @@ main() {
             directoryFunc &
         elif [ -n "$_file" ]; then
             "${_feh[@]}" "$_file"
+        elif [ -n "$_isTimeOfDay" ]; then
+            timeOfDayFunc &
         else
             onlineFunc &
         fi
