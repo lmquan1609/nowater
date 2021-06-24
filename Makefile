@@ -2,13 +2,15 @@
 
 PREFIX = /usr/local
 
-all:
-	@echo "Run 'sudo make install' to install nowater."
-	@echo "Run 'sudo make uninstall' to uninstall nowater."
+pkgname = nowater
 
 install:
-	@mkdir -p ${DESTDIR}${PREFIX}/bin
-	@install -m 755 nowater ${DESTDIR}${PREFIX}/bin/nowater
+	@mkdir -p ${DESTDIR}${PREFIX}/bin ${DESTDIR}${PREFIX}/share/${pkgname}/images
+	@install -m 755 ${pkgname} ${DESTDIR}${PREFIX}/bin/${pkgname}
+	@install -Dm644 images/* ${DESTDIR}${PREFIX}/share/${pkgname}/images
+	@install -Dm644 LICENSE ${DESTDIR}/usr/share/licenses/${pkgname}/LICENSE
 
 uninstall:
-	@rm -f ${DESTDIR}${PREFIX}/bin/nowater
+	@rm -f ${DESTDIR}${PREFIX}/bin/${pkgname}
+	@rm -rf ${DESTDIR}${PREFIX}/share/${pkgname}
+	@rm -rf ${DESTDIR}/usr/share/licenses/${pkgname}
