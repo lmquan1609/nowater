@@ -1,6 +1,6 @@
 #!/bin/bash
 
-_version="21.07"
+_version="21.07-dev"
 
 error() { echo -e "$1" && exit; }
 
@@ -68,7 +68,9 @@ get_args() {
             -p | --position)    _position=${2} ; shift 2 ;;
             -T | --time-of-day) _isTimeOfDay="true" ; shift ;;
             -k | --kill)        killall "${0##*/}"; exit ;;
-            -v | --version)     echo "nowater v$_version"; exit ;;
+            -v | --version)     echo "nowater v$_version"
+                                echo "Github: https://github.com/justanoobcoder/nowater"
+                                exit ;;
             -h | --help)        usage ;;
             -- | '')            shift; break ;;
             *) echo "Unexpected option: $1 is not a valid option." ; usage ;;
@@ -139,10 +141,7 @@ videoFunc() {
     }
     _frameCount=$(ls "$_video_dir"/*.jpg | wc -l)
 
-    echo "$_video" > "$_video_dir/video.info"
-    echo "$_fps" >> "$_video_dir/video.info"
-    echo "$_duration" >> "$_video_dir/video.info"
-    echo "$_position" >> "$_video_dir/video.info"
+    printf "$_video\n$_fps\n$_duration\n$_position" > "$_video_dir/video.info"
 
     for ((i=1; ; ++i)); do
         [ $i -gt $_frameCount ] && i=1              
