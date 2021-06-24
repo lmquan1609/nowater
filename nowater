@@ -120,32 +120,41 @@ bgtypeFunc() {
 }
 
 checkVideoInfo() {
-    [ "$(sed -n 1p $_video_dir/video.info 2> /dev/null)" == "$1" ] &&
-    [ "$(sed -n 2p $_video_dir/video.info 2> /dev/null)" == "$2" ] &&
-    [ "$(sed -n 3p $_video_dir/video.info 2> /dev/null)" == "$3" ] &&
-    [ "$(sed -n 4p $_video_dir/video.info 2> /dev/null)" == "$4" ]
+    readarray _videoInfo < ~/.cache/nowater/video/video.info
+    for ((i=0; i<${#_videoInfo[@]}; ++i)); do
+        [ "${_videoInfo[$i]//[$'\n']}" != "$1" ] && return 1
+        shift
+    done
+}
+
+createVideoInfo() {
+    rm -f "$_videoDir/video.info"
+    while [ "$1" ]; do
+        echo "$1" >> "$_videoDir/video.info"
+        shift
+    done
 }
 
 videoFunc() {
-    _video_dir="$_nowaterDir/video"
-    [ ! -d "$_video_dir" ] && mkdir -p "$_video_dir"
+    _videoDir="$_nowaterDir/video"
+    [ ! -d "$_videoDir" ] && mkdir -p "$_videoDir"
 
     [ -z "$_fps" ] && _fps=23
     [ -z "$_duration" ] && _duration=10
     [ -z "$_position" ] && _position="00:00"
 
     checkVideoInfo "$_video" "$_fps" "$_duration" "$_position" || {
-        rm -rf "$_video_dir"/*
+        rm -rf "$_videoDir"/*
         ffmpeg -y -ss "$_position" -i "$_video" -t $_duration -q:v 4 -vf fps=$_fps \
-            "$_video_dir/videoframe%06d.jpg" -loglevel error
+            "$_videoDir/videoframe%06d.jpg" -loglevel error
     }
-    _frameCount=$(ls "$_video_dir"/*.jpg | wc -l)
+    _frameCount=$(ls "$_videoDir"/*.jpg | wc -l)
 
-    printf "$_video\n$_fps\n$_duration\n$_position" > "$_video_dir/video.info"
+    createVideoInfo $_video $_fps $_duration $_position
 
     for ((i=1; ; ++i)); do
         [ $i -gt $_frameCount ] && i=1              
-        "${_feh[@]}" $(ls -1 "$_video_dir/"*.jpg | sed -n "${i}p")
+        "${_feh[@]}" $(ls -1 "$_videoDir/"*.jpg | sed -n "${i}p")
         sleep 0.01
     done
 }
