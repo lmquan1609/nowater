@@ -6,7 +6,8 @@ error() { echo -e "$1" && exit; }
 
 checkDependency() {
     while [ -n "$1" ]; do
-        command -v "$1" > /dev/null || error "This script required $1 to work, so install it first!"
+        command -v "$1" > /dev/null ||
+            error "This script required $1 to work, so install it first!"
         shift
     done
 }
@@ -17,7 +18,7 @@ checkInternet() {
 }
 
 setup() {
-	checkDependency feh wget jq ffmpeg sed
+    checkDependency feh wget jq ffmpeg sed
     _cacheDir="$HOME/.cache"
     _nowaterDir="$_cacheDir/nowater"
     _link="https://source.unsplash.com/random/"
@@ -49,7 +50,8 @@ usage() {
 
 get_args() {
     PARSED_ARGUMENTS=$(getopt -a -n $0 -o b:c:l:s:r:t:f:d:V:F:D:p:Tkvh \
-        -l bgtype:,custom:,link:,search:,subreddit:,time:,file:,directory:,video:,fps:,duration:,position:,time-of-day,kill,version,help -- "$@")
+        -l bgtype:,custom:,link:,search:,subreddit:,time:,file:,directory:,\
+        video:,fps:,duration:,position:,time-of-day,kill,version,help -- "$@")
     [ $? -ne 0 ] && usage
 
     while :; do
