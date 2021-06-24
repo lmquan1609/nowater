@@ -9,7 +9,7 @@ checkDependency() {
 }
 
 checkInternet() {
-    wget --hsts-file="$_cacheDir/wget-hsts" --quiet --spider google.com &&
+    wget --quiet --spider google.com &&
         return 0 || { echo "No internet!" && return 1;}
 }
 
@@ -21,13 +21,10 @@ setup() {
     checkDependency sed
     _cacheDir="$HOME/.cache"
     _nowaterDir="$_cacheDir/nowater"
-    _default_wp_url="https://raw.githubusercontent.com/justanoobcoder/nowater/master/default.jpg"
     _link="https://source.unsplash.com/random/"
     [ ! -d "$_nowaterDir" ] && mkdir -p "$_nowaterDir"
-    [ ! -f "$_nowaterDir/default.jpg" ] && checkInternet &&
-        wget --hsts-file="$_cacheDir/wget-hsts" -T 60 --no-check-certificate \
-        -q -P down -O "$_nowaterDir/default.jpg" $_default_wp_url
-    _imgsDir="./images"
+    _imgsDir="/usr/local/share/nowater/images"
+    _defaultWp="$_imgsDir/default-wallpaper.png"
 }
 
 usage() {
@@ -98,19 +95,19 @@ reddit() {
     _sub="$(echo -e "${_sub}" | tr -d '[:space:]')"
     [ -n "$1" ] && _sub=$1
     _url="https://www.reddit.com/r/$_sub/hot/.json?raw_json=1&t="
-    _content=`wget --hsts-file="$_cacheDir/wget-hsts" -T 10 -q -O - $_url`
+    _content=`wget -T 10 -q -O - $_url`
     _urls=$(echo -n "$_content" | jq -r '.data.children[]|select(.data.post_hint|test("image")?) | .data.preview.images[0].source.url')
     _arrURLS=($_urls)
     wait
     _size=${#_arrURLS[@]}
     if [ $_size -eq 0 ]; then
-        [ -f /tmp/nowater.jpg ] && _feh+=("/tmp/nowater.jpg") || "${_feh[@]}" "$_nowaterDir/default.jpg"
+        [ -f /tmp/nowater.jpg ] && _feh+=("/tmp/nowater.jpg") || "${_feh[@]}" "$_defaultWp"
         error "The current subreddit is not valid."
     fi
     idx=$(($RANDOM % $_size))
     _target_url=${_arrURLS[$idx]}
-    wget --hsts-file="$_cacheDir/wget-hsts" -T 10 --no-check-certificate \
-        -q -P down -O "/tmp/nowater.jpg" $_target_url &>/dev/null
+    wget -T 10 --no-check-certificate -q -P down \
+        -O "/tmp/nowater.jpg" $_target_url &>/dev/null
 }
 
 bgtypeFunc() {
@@ -170,11 +167,11 @@ onlineFunc() {
                 reddit "$_sub"
             else
                 [ -n "$_custom_link" ] && _link="$_custom_link" || unsplash
-                checkInternet && wget --hsts-file="$_cacheDir/wget-hsts" -q -O "/tmp/nowater.jpg" "$_link"
+                checkInternet && wget -q -O "/tmp/nowater.jpg" "$_link"
             fi
             "${_feh[@]}" "/tmp/nowater.jpg"
         else
-            "${_feh[@]}" "$_nowaterDir/default.jpg"
+            "${_feh[@]}" "$_defaultWp"
             touch /tmp/login.nowall
         fi
         [ -n "$_time" ] && sleep "$_time" || break
@@ -184,7 +181,7 @@ onlineFunc() {
 timeOfDayFunc() {
     while :; do
         _hour=`date +%k`
-        "${_feh[@]}" /usr/local/share/nowater/images/$_hour.png
+        "${_feh[@]}" "$_imgsDir/$_hour.png"
         sleep 10m
     done
 }
