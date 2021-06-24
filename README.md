@@ -71,7 +71,7 @@ $ nowater -d ~/Pictures/Wallpapers/ -t 30s      # change wallpaper every 30 seco
 $ nowater -h
 ```
 Set wallpapers according to current time: `nowater -T`
-![gif](https://raw.githubusercontent.com/justanoobcoder/nowater/dev/nowater.gif)
+![gif](https://raw.githubusercontent.com/justanoobcoder/files/master/nowater/nowater.gif)
 
 ## Attention
 - If you run nowater with loop (-t option) or live wallpaper (-V option), you must kill nowater process before running it again. Nowater can be killed by running `nowater -k` or `nowater --kill`.
