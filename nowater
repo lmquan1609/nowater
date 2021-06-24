@@ -5,7 +5,10 @@ _version="21.07"
 error() { echo -e "$1" && exit; }
 
 checkDependency() {
-    which "$1" > /dev/null || error "This script required $1 to work, so install it first!"
+    while [ -n "$1" ]; do
+        command -v "$1" > /dev/null || error "This script required $1 to work, so install it first!"
+        shift
+    done
 }
 
 checkInternet() {
@@ -14,11 +17,7 @@ checkInternet() {
 }
 
 setup() {
-	checkDependency feh
-    checkDependency wget
-    checkDependency jq
-    checkDependency ffmpeg
-    checkDependency sed
+	checkDependency feh wget jq ffmpeg sed
     _cacheDir="$HOME/.cache"
     _nowaterDir="$_cacheDir/nowater"
     _link="https://source.unsplash.com/random/"
