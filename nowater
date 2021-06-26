@@ -92,11 +92,8 @@ reddit() {
     [ ! -f "$_nowaterDir/subreddits" ] && printf "wallpaper\nwallpapers" > "$_nowaterDir/subreddits"
 
     readarray _subreddits < "$_nowaterDir/subreddits"
-    a=${#_subreddits[@]}
-    b=$(($RANDOM % $a))
-    _sub=${_subreddits[$b]}
-    _sub="$(echo -e "${_sub}" | tr -d '[:space:]')"
-    [ -n "$1" ] && _sub=$1
+    _sub="$(echo -e "${_subreddits[$(($RANDOM % ${#_subreddits[@]}))]}" | tr -d '[:space:]')"
+    [ -n "$1" ] && _sub="$1"
     _url="https://www.reddit.com/r/$_sub/hot/.json?raw_json=1&t="
     _content=`wget -T 10 -q -O - $_url`
     _urls=$(echo -n "$_content" | jq -r '.data.children[]|select(.data.post_hint|test("image")?) | .data.preview.images[0].source.url')
