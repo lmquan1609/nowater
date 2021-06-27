@@ -187,7 +187,7 @@ onlineFunc() {
 timeOfDayFunc() {
     while :; do
         _hour=`date +%k`
-        "${_feh[@]}" "$_imgsDir/$_hour.png"
+        "${_feh[@]}" "$_imgsDir/$((_hour/1)).png"
         sleep 10m
     done
 }
