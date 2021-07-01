@@ -4,6 +4,9 @@ PREFIX = /usr/local
 
 pkgname = nowater
 
+all:
+	@echo "Visit https://github.com/justanoobcoder/nowater for more details."
+
 install:
 	@mkdir -p ${DESTDIR}${PREFIX}/bin ${DESTDIR}${PREFIX}/share/${pkgname}/images
 	@install -m 755 ${pkgname} ${DESTDIR}${PREFIX}/bin/${pkgname}
