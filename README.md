@@ -74,7 +74,7 @@ Set wallpapers according to current time: `nowater -T`
 ![gif](https://raw.githubusercontent.com/justanoobcoder/files/master/nowater/nowater.gif)
 
 ## Attention
-- If you run nowater with loop (-t option) or live wallpaper (-V option), you must kill nowater process before running it again. Nowater can be killed by running `nowater -k` or `nowater --kill`.
+- If you run nowater with loop (-t, -T option) or live wallpaper (-V option), you must kill nowater process before running it again. Nowater can be killed by running `nowater -k` or `nowater --kill`.
 - Live wallpaper is cool but your CPU may not like it, so I don't recommend to use it.
 
 ## Tips and tricks
