@@ -104,8 +104,7 @@ reddit() {
         [ -f /tmp/nowater.jpg ] && _feh+=("/tmp/nowater.jpg") || "${_feh[@]}" "$_defaultWp"
         error "The current subreddit is not valid."
     fi
-    idx=$(($RANDOM % $_size))
-    _target_url=${_arrURLS[$idx]}
+    _target_url=${_arrURLS[$(($RANDOM % $_size))]}
     wget -T 10 --no-check-certificate -q -P down \
         -O "/tmp/nowater.jpg" $_target_url &>/dev/null
 }
