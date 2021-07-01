@@ -1,6 +1,6 @@
 #!/bin/bash
 
-_version="21.07-dev"
+_version="21.07"
 
 error() { echo -e "$1" && exit; }
 
