@@ -8,7 +8,7 @@ all:
 	@echo "Visit https://github.com/justanoobcoder/nowater for more details."
 
 install:
-	@cp -f ${pkgname} ${DESTDIR}${PREFIX}/bin/
+	@install -Dm755 ${pkgname} ${DESTDIR}${PREFIX}/bin/${pkgname}
 	@install -Dm644 images/* -t ${DESTDIR}${PREFIX}/share/${pkgname}/images
 	@install -Dm644 LICENSE ${DESTDIR}/usr/share/licenses/${pkgname}/LICENSE
 
