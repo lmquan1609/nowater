@@ -1,6 +1,8 @@
 .PHONY= all install uninstall
 
-PREFIX = /usr/local
+PREFIX ?= /usr/local
+DATADIR ?= ${PREFIX}/share
+LICENSEDIR = /usr/share/licenses
 
 pkgname = nowater
 
@@ -8,11 +10,14 @@ all:
 	@echo "Visit https://github.com/justanoobcoder/nowater for more details."
 
 install:
-	@install -Dm755 ${pkgname} ${DESTDIR}${PREFIX}/bin/${pkgname}
-	@install -Dm644 images/* -t ${DESTDIR}${PREFIX}/share/${pkgname}/images
-	@install -Dm644 LICENSE ${DESTDIR}/usr/share/licenses/${pkgname}/LICENSE
+	@mkdir -p ${DESTDIR}${PREFIX}/bin
+	@mkdir -p ${DESTDIR}${LICENSEDIR}/${pkgname}
+	@mkdir -p ${DESTDIR}${DATADIR}/${pkgname}/images
+	@install -m 755 ${pkgname} ${DESTDIR}${PREFIX}/bin/${pkgname}
+	@install -Dm644 LICENSE ${DESTDIR}${LICENSEDIR}/${pkgname}/LICENSE
+	@install -Dm644 images/* ${DESTDIR}${DATADIR}/${pkgname}/images
 
 uninstall:
 	@rm -f ${DESTDIR}${PREFIX}/bin/${pkgname}
-	@rm -rf ${DESTDIR}${PREFIX}/share/${pkgname}
-	@rm -rf ${DESTDIR}/usr/share/licenses/${pkgname}
+	@rm -rf ${DESTDIR}${DATADIR}/${pkgname}
+	@rm -rf ${DESTDIR}${LICENSEDIR}/${pkgname}
