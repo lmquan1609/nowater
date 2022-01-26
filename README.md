@@ -34,33 +34,9 @@ $ nowater -s "sea sunset"
 $ nowater -l <image url>
 $ nowater -l https://www.ixpap.com/images/2021/03/tanjiro-wallpaper-ixpap-6.jpg
 
-# To get a random wallpaper from one of the set subreddits
-# (in ~/.cache/nowater/subreddits file)
-$ nowater -l reddit
-
-# To get a random wallpaper from a custom subreddit
-$ nowater -r <subreddit>
-$ nowater -r earthporn
-
-# To use the builtin feh --bg options
-$ nowater -b <option>
-$ nowater -b bg-scale -r wallpapers
-
-# To add custom feh flags
-$ nowater -c <flags>
-$ nowater -c --no-xinerama -r widescreen-wallpaper
-
 # To set wallpaper from an image file
 $ nowater -f </path/to/image/file>
 $ nowater -f ~/Pictures/Wallpapers/wallpaper.png
-
-# Choose a random background from a directory
-$ nowater -d </path/to/dir>
-$ nowater -d ~/Pictures/Wallpapers/
-
-# To get a live wallpaper from a short video
-$ nowater -V </path/to/video/file>
-$ nowater -V ~/Videos/video.mp4     # for now, nowater only supports mp4 format
 
 # To create a loop
 $ nowater -t <cycle time>

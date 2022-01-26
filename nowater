@@ -174,7 +174,7 @@ onlineFunc() {
                 [ -n "$_custom_link" ] && _link="$_custom_link" || unsplash
                 checkInternet && wget -q -O "/tmp/nowater.jpg" "$_link"
             fi
-            "${_feh[@]}" "/tmp/nowater.jpg"
+            /usr/bin/gsettings set org.gnome.desktop.background picture-uri file:////tmp/nowater.jpg
         else
             "${_feh[@]}" "$_defaultWp"
             touch /tmp/login.nowall
@@ -186,7 +186,7 @@ onlineFunc() {
 timeOfDayFunc() {
     while :; do
         _hour=`date +%k`
-        "${_feh[@]}" "$_imgsDir/$((_hour/1)).png"
+        /usr/bin/gsettings set org.gnome.desktop.background picture-uri file:///"$_imgsDir/$((_hour/1)).png"
         sleep 10m
     done
 }
@@ -200,6 +200,7 @@ main() {
     _feh=(feh --no-fehbg)
     [ -n "$_bgtype" ] && bgtypeFunc || _feh+=(--bg-scale)
     [ -n "$_custom" ] && _feh+=($_custom)
+
     if [ -n "$_video" ]; then
         videoFunc &
     else {
